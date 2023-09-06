@@ -19,11 +19,12 @@ interface CandlestickData {
 const FinancialChartIndicatorCustom: React.FC = () => {
   const [data, setData] = useState<CandlestickData[]>([]);
 
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
         const stockData = await getStockData();
-        const filteredArrays = stockData.map((item: any) => {
+        const newData = stockData.map((item: any) => {
           const date = new Date(parseInt(item[0]));
           return {
             date: date.getTime(),
@@ -34,42 +35,20 @@ const FinancialChartIndicatorCustom: React.FC = () => {
             volume: parseInt(item[5]),
           };
         });
-        setData(filteredArrays);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
-    const fetchDatalimit = async () => {
-      try {
-        const stockData = await getStockDataLimit();
-        const filteredArrays = stockData.map((item: any) => {
-          const date = new Date(parseInt(item[0]));
-          return {
-            date: date.getTime(),
-            open: parseInt(item[1]),
-            high: parseInt(item[2]),
-            low: parseInt(item[3]),
-            close: parseInt (item[4]),
-            volume: parseInt(item[5]),
-          };
-        });
-        console.log("Limited array ",filteredArrays)
+
+        // Append new data to the existing data array
+        setData((prevData) => [...prevData, ...newData]);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     };
 
-    
+    fetchData(); // Initial fetch
+    const intervalId = setInterval(fetchData, 5000); // Fetch data every 5 seconds
 
-    const intervalId = setInterval(() => {
-      fetchData();
-    }, 1000 * 5) // in milliseconds
-    return () => clearInterval(intervalId)
-   
+    return () => clearInterval(intervalId);
+  }, []);
 
-
-    
-  },[]);
 
   const applyCustomIndicators = (
     chart: IgrFinancialChart,
